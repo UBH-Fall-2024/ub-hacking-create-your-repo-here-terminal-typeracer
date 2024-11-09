@@ -13,9 +13,11 @@ const (
 )
 
 type Server struct {
-	lobbies []network.Lobby  //TODO
-	clients []network.Client //TODO
-	ln      net.Listener
+	Lobbies      []network.Lobby  //TODO
+	Clients      []network.Client //TODO
+	ln           net.Listener
+	totalLobbies uint
+	totalClients uint
 }
 
 func main() {
@@ -25,9 +27,11 @@ func main() {
 	}
 
 	server := Server{
-		lobbies: []network.Lobby{},  //TODO
-		clients: []network.Client{}, //TODO
-		ln:      ln,
+		Lobbies:      []network.Lobby{},  //TODO
+		Clients:      []network.Client{}, //TODO
+		ln:           ln,
+		totalLobbies: 0,
+		totalClients: 0,
 	}
 
 	startServer(server)
@@ -48,4 +52,15 @@ func startServer(server Server) {
 
 func startClient(conn net.Conn) {
 
+}
+
+func (s *Server) newClient(conn net.Conn) network.Client {
+	currentClients := s.totalClients
+
+	s.totalClients += 1
+
+	return network.Client{
+		Id:   network.ClientID(currentClients),
+		Conn: conn,
+	}
 }
