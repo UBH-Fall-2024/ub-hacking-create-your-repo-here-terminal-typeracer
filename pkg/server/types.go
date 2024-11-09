@@ -7,6 +7,9 @@ package server
 import (
 	"encoding/gob"
 	"net"
+
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
+	"github.com/charmbracelet/log"
 )
 
 type ClientID uint
@@ -17,10 +20,11 @@ type Lobby struct {
 }
 
 type Client struct {
-	Conn net.Conn
-	Id   ClientID
-	enc  gob.Encoder
-	dec  gob.Decoder
+	Conn  net.Conn
+	Id    ClientID
+	enc   gob.Encoder
+	dec   gob.Decoder
+	lobby *Lobby
 }
 
 func (c *Client) Start() {
@@ -28,6 +32,15 @@ func (c *Client) Start() {
 	c.dec = *gob.NewDecoder(c.Conn)
 
 	for {
+		var message network.Message
+		if err := c.dec.Decode(&message); err != nil {
+			log.Error("Could not decode")
+		}
+		go c.handleMessage(message)
 
 	}
+}
+
+func (c *Client) handleMessage(message network.Message) {
+
 }
