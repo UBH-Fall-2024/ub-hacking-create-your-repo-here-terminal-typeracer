@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net"
+
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
 )
 
 const (
@@ -11,8 +13,8 @@ const (
 )
 
 type Server struct {
-	lobbies []Lobby  //TODO
-	clients []Client //TODO
+	lobbies []network.Lobby  //TODO
+	clients []network.Client //TODO
 	ln      net.Listener
 }
 
@@ -23,8 +25,8 @@ func main() {
 	}
 
 	server := Server{
-		lobbies: []invalid{}, //TODO
-		clients: []invalid{}, //TODO
+		lobbies: []network.Lobby{},  //TODO
+		clients: []network.Client{}, //TODO
 		ln:      ln,
 	}
 
