@@ -7,7 +7,7 @@ const (
 	// When the client connects to the server initially
 	//
 	// "<name>"
-	Start Request = iota
+	Connect Request = iota
 
 	// When the client wants to connect to a lobby
 	JoinLobby

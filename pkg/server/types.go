@@ -49,4 +49,15 @@ func (c *Client) Start() {
 }
 
 func (c *Client) handleMessage(message network.Message) {
+	req := network.Request(message.Header)
+
+	switch req {
+	case network.Connect:
+		// TODO
+	case network.JoinLobby:
+		// TODO
+	case network.Progress:
+		// TODO
+	default:
+	}
 }
