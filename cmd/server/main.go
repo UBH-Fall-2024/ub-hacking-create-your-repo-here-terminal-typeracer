@@ -46,21 +46,16 @@ func startServer(server Server) {
 			continue
 		}
 
-		go startClient(conn)
+		go server.newClient(conn).Start()
 	}
 }
 
-func startClient(conn net.Conn) {
+func (s *Server) newClient(conn net.Conn) *network.Client {
 
-}
-
-func (s *Server) newClient(conn net.Conn) network.Client {
-	currentClients := s.totalClients
+	c := new(network.Client)
+	c.Id = network.ClientID(s.totalClients)
+	c.Conn = conn
 
 	s.totalClients += 1
-
-	return network.Client{
-		Id:   network.ClientID(currentClients),
-		Conn: conn,
-	}
+	return c
 }
