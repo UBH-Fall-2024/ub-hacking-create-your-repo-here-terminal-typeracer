@@ -2,7 +2,7 @@
 //
 // Contains all the information for lobbies, clients, etc
 
-package network
+package server
 
 import (
 	"encoding/gob"

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/server"
 )
 
 const (
@@ -13,8 +13,8 @@ const (
 )
 
 type Server struct {
-	Lobbies      []network.Lobby  //TODO
-	Clients      []network.Client //TODO
+	Lobbies      []server.Lobby  //TODO
+	Clients      []server.Client //TODO
 	ln           net.Listener
 	totalLobbies uint
 	totalClients uint
@@ -27,8 +27,8 @@ func main() {
 	}
 
 	server := Server{
-		Lobbies:      []network.Lobby{},  //TODO
-		Clients:      []network.Client{}, //TODO
+		Lobbies:      []server.Lobby{},  //TODO
+		Clients:      []server.Client{}, //TODO
 		ln:           ln,
 		totalLobbies: 0,
 		totalClients: 0,
@@ -50,10 +50,10 @@ func startServer(server Server) {
 	}
 }
 
-func (s *Server) newClient(conn net.Conn) *network.Client {
+func (s *Server) newClient(conn net.Conn) *server.Client {
 
-	c := new(network.Client)
-	c.Id = network.ClientID(s.totalClients)
+	c := new(server.Client)
+	c.Id = server.ClientID(s.totalClients)
 	c.Conn = conn
 
 	s.totalClients += 1
