@@ -18,7 +18,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server := server.NewServer(ln)
-	startServer(server)
+	server.NewServer(ln).Start()
 
 }

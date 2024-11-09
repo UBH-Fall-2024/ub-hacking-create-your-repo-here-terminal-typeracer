@@ -6,9 +6,14 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+// Global server variable
+//
+// Local to this package (server directory) only
+var server *Server
+
 type Server struct {
-	Lobbies      []Lobby  //TODO
-	Clients      []Client //TODO
+	Lobbies      []Lobby
+	Clients      []Client
 	ln           net.Listener
 	totalLobbies uint
 	totalClients uint
@@ -22,17 +27,21 @@ func NewServer(ln net.Listener) *Server {
 	s.Clients = make([]Client, 8)
 	s.Lobbies = make([]Lobby, 8)
 
+	server = s
+
 	return s
 }
 
-func (s *Server) StartServer() {
+func (s *Server) Start() {
 	for {
+		// Listen for all incoming TCP connections
 		conn, err := s.ln.Accept()
 		if err != nil {
 			log.Error("Could not accept client connection", err)
 			continue
 		}
 
+		// Concurrently run each client
 		go s.newClient(conn).Start()
 	}
 }

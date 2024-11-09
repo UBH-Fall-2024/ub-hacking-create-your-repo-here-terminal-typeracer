@@ -1,5 +1,6 @@
 package network
 
+// Requests are sent from the client to the server
 type Request uint8
 
 const (
@@ -17,6 +18,7 @@ const (
 	Progress
 )
 
+// Events are sent from the server to the client to tell the client to do things
 type Event uint8
 
 const (

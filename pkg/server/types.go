@@ -15,10 +15,13 @@ import (
 type ClientID uint
 type LobbyID uint
 
+// The server side representation of a client
 type Lobby struct {
-	Id LobbyID
+	Id      LobbyID
+	Clients []Client
 }
 
+// The server side representation of a Connected client
 type Client struct {
 	Conn  net.Conn
 	Id    ClientID
@@ -32,15 +35,18 @@ func (c *Client) Start() {
 	c.dec = *gob.NewDecoder(c.Conn)
 
 	for {
+		// Read a message from the tcp connection
 		var message network.Message
 		if err := c.dec.Decode(&message); err != nil {
 			log.Error("Could not decode")
+			continue
 		}
-		go c.handleMessage(message)
+		// TODO perhaps make handling messages concurrent? idk if its necessary
+		// or could cause race conditions
+		c.handleMessage(message)
 
 	}
 }
 
 func (c *Client) handleMessage(message network.Message) {
-
 }
