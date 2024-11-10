@@ -94,6 +94,10 @@ func (c *Client) handleMessage(message network.Message) {
 				Header: uint8(network.JoinedLobby),
 				Data:   fmt.Sprintf("%d,%s", c.Id, c.Name),
 			}
+			c.SendMessage(&network.Message{
+				Header: uint8(network.JoinedLobby),
+				Data:   "OK",
+			})
 
 			// Let the client trying to join (c) know who is in the lobby they're
 			// joining, and tell everyone in the lobby currently that someone new
@@ -140,6 +144,7 @@ func (c *Client) Disconnect() {
 		log.Print("Could not tell the client they suck")
 	}
 
+	// Remove c from the list, we want to make them not in there anymore
 	for i, client := range lobby.Clients {
 		// Check if the client being iterated over has the same address as c
 		if client == c {
@@ -148,6 +153,10 @@ func (c *Client) Disconnect() {
 			lobby.Clients = lobby.Clients[:len(lobby.Clients)-1]
 			break
 		}
+	}
+
+	if len(lobby.Clients) == 0 {
+		lobby.State = WaitingForPlayers
 	}
 
 	message := network.Message{

@@ -69,7 +69,7 @@ func bubbleteaMiddleware() wish.Middleware {
 
 		m.SendMessage(&network.Message{
 			Header: uint8(network.Connect),
-			Data:   m.Sess.User(),
+			Data:   m.Username(),
 		})
 
 		// Handle all events sent by the server
@@ -95,14 +95,17 @@ func bubbleteaMiddleware() wish.Middleware {
 		}
 
 		conn, err := net.Dial("tcp", server.ServerAddress())
-		log.Info("Connect ion is right here", conn)
 		if err != nil {
 			log.Print("Could not connect the poor soul :(")
 			return nil
 		}
 
 		m := tui.NewModel(renderer, &pty, &conn, s)
-		return newProg(m, append(bubbletea.MakeOptions(s), tea.WithAltScreen())...)
+		return newProg(m, append(
+			bubbletea.MakeOptions(s),
+			tea.WithAltScreen(),
+			tea.WithMouseCellMotion(),
+		)...)
 	}
 	return bubbletea.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
 }

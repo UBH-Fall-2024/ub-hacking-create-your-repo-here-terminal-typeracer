@@ -30,7 +30,8 @@ const (
 	// also sent to the client that joined for every client already inside the
 	// lobby
 	//
-	// "<id>,<name>"
+	// "<id>,<name>" OR "OK" // Ok is used to let client know that it's all
+	// gucci
 	JoinedLobby
 
 	// Sent to all clients in a lobby when someone leaves the lobby
