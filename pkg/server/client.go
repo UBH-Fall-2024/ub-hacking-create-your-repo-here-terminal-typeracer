@@ -72,6 +72,7 @@ func (c *Client) handleMessage(message network.Message) {
 				clientName = clientName[:16]
 			}
 
+			c.Name = clientName
 			server.Clients = append(server.Clients, c)
 			return
 		case network.JoinLobby:
@@ -161,9 +162,7 @@ func (c *Client) Disconnect() {
 		for i, client := range lobby.Clients {
 			// Check if the client being iterated over has the same address as c
 			if client == c {
-				// remove the client from the list
-				lobby.Clients[i] = lobby.Clients[len(lobby.Clients)-1]
-				lobby.Clients = lobby.Clients[:len(lobby.Clients)-1]
+				lobby.Clients = append(lobby.Clients[:i], lobby.Clients[i+1:]...)
 				break
 			}
 		}
@@ -172,15 +171,15 @@ func (c *Client) Disconnect() {
 			lobby.State = WaitingForPlayers
 		}
 
-		message := network.Message{
-			Header: uint8(network.LeftLobby),
-			Data:   string(c.Id),
+		for _, client := range lobby.Clients {
+			log.Print("client", client.Name)
 		}
 
-		// Doing double for loop because i am scared removing from list will mess
-		// with iteration
-		for _, client := range lobby.Clients {
-			client.SendMessage(&message)
+		if err := lobby.SendMessage(&network.Message{
+			Header: uint8(network.LeftLobby),
+			Data:   strconv.Itoa(int(c.Id)),
+		}); err != nil {
+			log.Print("ERR")
 		}
 	}
 }

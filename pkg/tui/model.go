@@ -32,19 +32,26 @@ const (
 	joinLobby = "join_lobby"
 )
 
+type typingInfo struct {
+	text              string
+	correctCharacters int
+	typoCharacters    int
+}
+
 type Model struct {
 	width    int
 	height   int
 	renderer *lipgloss.Renderer
 	enc      *gob.Encoder
 	dec      *gob.Decoder
-	conn     net.Conn
+	Conn     net.Conn
 	sess     ssh.Session
 	state    modelState
 
 	// Various ui menu status
 	error          *string
-	clientsInLobby map[]Client
+	clientsInLobby []Client
+	typingInfo     *typingInfo
 
 	zone  zone.Manager
 	style Style
@@ -57,7 +64,7 @@ func NewModel(
 	sess ssh.Session,
 ) *Model {
 	return &Model{
-		conn:           *conn,
+		Conn:           *conn,
 		width:          pty.Window.Width,
 		height:         pty.Window.Height,
 		renderer:       renderer,
@@ -104,7 +111,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Sequence(func() tea.Msg {
-				return m.conn.Close()
+				return m.Conn.Close()
 			}, tea.Quit)
 		default:
 			if msg.String() == "q" && m.error != nil {
@@ -164,6 +171,14 @@ func (m *Model) View() string {
 			lipgloss.Center, // h align
 			lipgloss.Center, // v align
 			m.RenderClients(),
+		)
+	case inGame:
+		view = m.renderer.Place(
+			m.width,
+			m.height,
+			lipgloss.Center, // h align
+			lipgloss.Center, // v align
+			m.RenderTyper(),
 		)
 	}
 

@@ -13,6 +13,8 @@ func (m *Model) RenderClients() string {
 		var name string
 		if client.Id == "YOU" {
 			name = client.Name + " (you)"
+		} else {
+			name = client.Name
 		}
 
 		clients = append(clients, name)
@@ -27,4 +29,9 @@ func (m *Model) RenderClients() string {
 			MarginRight(1)).ItemStyle(lipgloss.NewStyle().Width(22))
 
 	return l.String()
+}
+
+
+func (m* Model) RenderTyper() string {
+
 }

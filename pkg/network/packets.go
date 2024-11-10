@@ -54,11 +54,6 @@ const (
 	//
 	// "<text>"
 	GameStart
-
-	// Countdown before game starts, probably 3 of these.
-	//
-	//	"<num>"
-	GameStarting
 )
 
 type Message struct {
