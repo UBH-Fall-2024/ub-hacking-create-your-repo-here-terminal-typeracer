@@ -2,7 +2,6 @@ package tui
 
 import (
 	"encoding/gob"
-	"log"
 	"net"
 
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
@@ -39,12 +38,13 @@ type Model struct {
 	renderer *lipgloss.Renderer
 	enc      *gob.Encoder
 	dec      *gob.Decoder
+	conn     net.Conn
 	sess     ssh.Session
 	state    modelState
 
 	// Various ui menu status
 	error          *string
-	clientsInLobby []Client
+	clientsInLobby map[]Client
 
 	zone  zone.Manager
 	style Style
@@ -57,6 +57,7 @@ func NewModel(
 	sess ssh.Session,
 ) *Model {
 	return &Model{
+		conn:           *conn,
 		width:          pty.Window.Width,
 		height:         pty.Window.Height,
 		renderer:       renderer,
@@ -102,7 +103,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
-			return m, tea.Quit
+			return m, tea.Sequence(func() tea.Msg {
+				return m.conn.Close()
+			}, tea.Quit)
 		default:
 			if msg.String() == "q" && m.error != nil {
 				cmds = append(cmds, func() tea.Msg {
@@ -112,11 +115,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case tea.MouseMsg:
-		// No hover...
 		if msg.Action != tea.MouseActionRelease || msg.Button != tea.MouseButtonLeft {
 			return m, nil
 		}
-		log.Print(m.zone.Get(joinLobby))
 
 		if m.zone.Get(joinLobby).InBounds(msg) {
 			cmds = append(cmds, func() tea.Msg {
@@ -125,7 +126,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					Data:   "",
 				})
 				m.state = connecting
-				return nil
+				return 0
 			})
 
 		}

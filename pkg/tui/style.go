@@ -17,9 +17,7 @@ func NewStyle(renderer *lipgloss.Renderer) Style {
 		Background(purple).
 		Padding(0, 1)
 
-	border := lipgloss.NewStyle().
-		Padding(1, 2).
-		Border(lipgloss.RoundedBorder())
+	border := lipgloss.NewStyle().Padding(1, 2)
 
 	return Style{
 		buttonStyle:     buttonStyle,

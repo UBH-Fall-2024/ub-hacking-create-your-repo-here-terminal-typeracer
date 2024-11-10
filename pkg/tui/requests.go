@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"log"
 	"strings"
 
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
@@ -18,7 +19,7 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 		switch network.Event(msg.Header) {
 		case network.Error:
 			m.error = &msg.Data
-			return nil
+			return 0
 		case network.JoinedLobby:
 			if msg.Data == "OK" {
 				m.state = inLobby
@@ -26,10 +27,15 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 					Id:   "YOU",
 					Name: m.Username(),
 				})
-				return nil
+				return 0
 			}
 
-			res := strings.SplitN(msg.Data, ",", 1)
+			res := strings.SplitN(msg.Data, ",", 2)
+
+			if len(res) != 2 {
+				log.Print(res)
+				return nil
+			}
 
 			m.clientsInLobby = append(m.clientsInLobby, Client{
 				Id:   res[0],

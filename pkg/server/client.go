@@ -118,6 +118,7 @@ func (c *Client) handleMessage(message network.Message) {
 			}
 
 		}
+		return
 	}
 
 	// switch statement ain't needed here but idc anymore
