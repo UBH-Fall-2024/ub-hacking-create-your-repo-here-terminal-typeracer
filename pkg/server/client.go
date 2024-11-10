@@ -69,6 +69,7 @@ func (c *Client) handleMessage(message network.Message) {
 		clientName = clientName[:16]
 
 		server.Clients = append(server.Clients, c)
+		log.Print("&**********************************G STUFF IS WORKING!!!!!!!!!!!!!!!!!!!!!")
 		return
 	}
 

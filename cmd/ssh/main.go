@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/tui"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
@@ -62,8 +63,26 @@ func main() {
 }
 
 func bubbleteaMiddleware() wish.Middleware {
-	newProg := func(m tea.Model, opts ...tea.ProgramOption) *tea.Program {
+	newProg := func(m *tui.Model, opts ...tea.ProgramOption) *tea.Program {
 		p := tea.NewProgram(m, opts...)
+
+		m.SendMessage(&network.Message{
+			Header: uint8(network.Connect),
+			Data:   m.Sess.User(),
+		})
+
+		// Handle all events sent by the server
+		go func() {
+			for {
+				message, err := m.ReadMessage()
+				if err != nil {
+					log.Print("Could not read from server: ", err)
+					continue
+				}
+				p.Send(message)
+			}
+		}()
+
 		return p
 	}
 	teaHandler := func(s ssh.Session) *tea.Program {
@@ -80,7 +99,7 @@ func bubbleteaMiddleware() wish.Middleware {
 			return nil
 		}
 
-		m := tui.NewModel(renderer, &pty, &conn)
+		m := tui.NewModel(renderer, &pty, &conn, s)
 		return newProg(m, append(bubbletea.MakeOptions(s), tea.WithAltScreen())...)
 	}
 	return bubbletea.MiddlewareWithProgramHandler(teaHandler, termenv.ANSI256)
