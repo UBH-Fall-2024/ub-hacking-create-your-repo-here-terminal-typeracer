@@ -1,8 +1,10 @@
 package tui
 
 import (
+	"fmt"
 	"strings"
 
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/server"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/list"
 )
@@ -31,9 +33,14 @@ func (m *Model) RenderClients() string {
 		EnumeratorStyle(lipgloss.
 			NewStyle().
 			Foreground(lipgloss.Color("93")).
-			MarginRight(1)).ItemStyle(lipgloss.NewStyle().Width(22))
+			MarginRight(1)).ItemStyle(lipgloss.NewStyle().Width(22)).
+		String()
 
-	return l.String()
+	return lipgloss.JoinVertical(
+		lipgloss.Center,
+		m.style.notiStyle.Render(fmt.Sprint("Waiting for ", server.LOBBY_SIZE-len(clients), " more player(s) to join")),
+		l,
+	)
 }
 
 func renderCar(color string, prog int) string {
@@ -69,6 +76,7 @@ func (m *Model) RenderTyper() string {
 	s := lipgloss.JoinVertical(lipgloss.Center, carGloss, lipgloss.
 		NewStyle().
 		Width(70).
+		Foreground(lipgloss.Color("253")).
 		Padding(4, 6, 0, 5).
 		Render(m.renderText()),
 	)
@@ -87,8 +95,8 @@ func (m *Model) renderText() string {
 
 	start = lipgloss.
 		NewStyle().
-		Foreground(lipgloss.Color("253")).
-		Bold(true).
+		// Foreground(lipgloss.Color("253")).
+		// Bold(true).
 		Render(start)
 	typo = lipgloss.
 		NewStyle().

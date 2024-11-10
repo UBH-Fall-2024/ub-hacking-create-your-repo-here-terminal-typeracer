@@ -138,8 +138,11 @@ func (c *Client) handleMessage(message network.Message) {
 			}
 			if res == 100 {
 				c.Lobby.finished <- struct{}{}
+				for _, client := range c.Lobby.Clients {
+					client.Disconnect()
+					client.Conn.Close()
+				}
 			}
-
 		default:
 			c.SendError("Wtf man, not allowed")
 		}
@@ -170,10 +173,6 @@ func (c *Client) Disconnect() {
 		if len(lobby.Clients) == 0 {
 			lobby.State = WaitingForPlayers
 			lobby.finished <- struct{}{}
-		}
-
-		for _, client := range lobby.Clients {
-			log.Print("client", client.Name)
 		}
 
 		if err := lobby.SendMessage(&network.Message{

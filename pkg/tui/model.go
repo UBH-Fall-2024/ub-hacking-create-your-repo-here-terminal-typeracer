@@ -120,34 +120,35 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return nil
 				})
 			}
+			if v := m.typingInfo; v != nil {
 
-			v := m.typingInfo
-			if msg.Type == tea.KeyBackspace && v.typoCharacters+v.correctCharacters > 0 {
-				if v.typoCharacters > 0 {
-					v.typoCharacters -= 1
-				} else {
-					v.correctCharacters -= 1
-				}
-				cmds = append(cmds, func() tea.Msg { return 0 })
-			}
-
-			if msg.Type == tea.KeyRunes || msg.String() == " " {
-				if v.typoCharacters > 0 {
-					v.typoCharacters += 1
-				} else {
-					if v.correctCharacters > len(v.text) {
-						// We need to wait for the server to catch up with us
-						// :rolling_eyes:
-						return m, nil
-					}
-					next := v.text[v.correctCharacters]
-					if string(next) == msg.String() {
-						v.correctCharacters += 1
+				if msg.Type == tea.KeyBackspace && v.typoCharacters+v.correctCharacters > 0 {
+					if v.typoCharacters > 0 {
+						v.typoCharacters -= 1
 					} else {
-						v.typoCharacters += 1
+						v.correctCharacters -= 1
 					}
+					cmds = append(cmds, func() tea.Msg { return 0 })
 				}
-				cmds = append(cmds, func() tea.Msg { return 0 })
+
+				if msg.Type == tea.KeyRunes || msg.String() == " " {
+					if v.typoCharacters > 0 {
+						v.typoCharacters += 1
+					} else {
+						if v.correctCharacters > len(v.text) {
+							// We need to wait for the server to catch up with us
+							// :rolling_eyes:
+							return m, nil
+						}
+						next := v.text[v.correctCharacters]
+						if string(next) == msg.String() {
+							v.correctCharacters += 1
+						} else {
+							v.typoCharacters += 1
+						}
+					}
+					cmds = append(cmds, func() tea.Msg { return 0 })
+				}
 			}
 		}
 	case tea.MouseMsg:
