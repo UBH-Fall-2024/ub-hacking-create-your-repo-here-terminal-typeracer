@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -24,7 +25,7 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 		case network.JoinedLobby:
 			if msg.Data == "OK" {
 				m.state = inLobby
-				m.clientsInLobby = append(m.clientsInLobby, Client{
+				m.clientsInLobby = append(m.clientsInLobby, &Client{
 					Id:   "YOU",
 					Name: m.Username(),
 				})
@@ -33,7 +34,7 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 
 			res := strings.SplitN(msg.Data, ",", 2)
 
-			m.clientsInLobby = append(m.clientsInLobby, Client{
+			m.clientsInLobby = append(m.clientsInLobby, &Client{
 				Id:   res[0],
 				Name: res[1],
 			})
@@ -72,10 +73,14 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 					}
 
 					client.prog = &res
-					break
+					return 0
 				}
 			}
 		case network.ProgressPls:
+			m.SendMessage(&network.Message{
+				Header: uint8(network.Progress),
+				Data:   fmt.Sprintf("%d", m.typingInfo.correctCharacters/len(m.typingInfo.text)),
+			})
 		default:
 			panic("unexpected network.Event")
 		}

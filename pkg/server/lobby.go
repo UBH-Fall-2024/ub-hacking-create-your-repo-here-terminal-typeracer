@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-const LOBBY_SIZE = 4
+const LOBBY_SIZE = 2
 
 type LobbyState uint8
 

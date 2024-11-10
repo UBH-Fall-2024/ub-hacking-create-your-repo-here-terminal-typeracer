@@ -50,7 +50,7 @@ type Model struct {
 
 	// Various ui menu status
 	error          *string
-	clientsInLobby []Client
+	clientsInLobby []*Client
 	typingInfo     *typingInfo
 
 	zone  zone.Manager
@@ -73,7 +73,7 @@ func NewModel(
 		sess:           sess,
 		state:          noConnection,
 		error:          nil,
-		clientsInLobby: make([]Client, 0),
+		clientsInLobby: make([]*Client, 0),
 		zone:           *zone.New(),
 		style:          NewStyle(renderer),
 	}
@@ -119,6 +119,30 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.error = nil
 					return nil
 				})
+			}
+
+			v := m.typingInfo
+			if msg.Type == tea.KeyBackspace && v.typoCharacters+v.correctCharacters > 0 {
+				if v.typoCharacters > 0 {
+					v.typoCharacters -= 1
+				} else {
+					v.correctCharacters -= 1
+				}
+				cmds = append(cmds, func() tea.Msg { return 0 })
+			}
+
+			if msg.Type == tea.KeyRunes {
+				if v.typoCharacters > 0 {
+					v.typoCharacters += 1
+				} else {
+					next := v.text[v.correctCharacters+1]
+					if string(next) == msg.String() {
+						v.correctCharacters += 1
+					} else {
+						v.typoCharacters += 1
+					}
+				}
+				cmds = append(cmds, func() tea.Msg { return 0 })
 			}
 		}
 	case tea.MouseMsg:
