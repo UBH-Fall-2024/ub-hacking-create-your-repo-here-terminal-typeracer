@@ -65,7 +65,12 @@ func (s *Server) NewLobby() *Lobby {
 	}
 
 	s.totalLobbies += 1
-	l.HandleMessages()
+	// Go through each command one by one and run it
+	//
+	// Commands are requests made by client
+	for command := range l.commands {
+		command()
+	}
 	return &l
 }
 

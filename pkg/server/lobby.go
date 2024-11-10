@@ -37,23 +37,6 @@ func (l *Lobby) SendMessage(message *network.Message) error {
 	return nil
 }
 
-func NewLobby() *Lobby {
-	l := new(Lobby)
-	l.commands = make(chan func())
-	l.State = WaitingForPlayers
-
-	l.HandleMessages()
-	return l
-}
-
-// Will handle each command sent to it one by one so no race
-// conditions!!!!!!!!!!!!!
-func (l *Lobby) HandleMessages() {
-	// Do this so we do each command individually so there's no race conditions
-	for command := range l.commands {
-		command()
-	}
-}
 
 func (l *Lobby) Start() {
 
