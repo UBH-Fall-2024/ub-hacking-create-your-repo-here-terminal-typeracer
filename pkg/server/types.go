@@ -52,6 +52,7 @@ func (c *Client) Start() {
 		if err := c.dec.Decode(&message); err != nil {
 			// TODO better error handling, don't just kill the client maybe
 			log.Error("Could not read message from client")
+			c.Disconnect()
 			break
 		}
 		// TODO perhaps make handling messages concurrent? idk if its necessary
@@ -61,21 +62,17 @@ func (c *Client) Start() {
 	}
 }
 
-func (c *Client) SendMessage(message network.Message) error {
+func (c *Client) SendMessage(message *network.Message) error {
 	return c.enc.Encode(message)
 }
 
 // Used if the client was very naughty (Sending invalid requests and stuff!!)
-func (c *Client) SendError(err string) {
+func (c *Client) SendError(err string) error {
 	message := network.Message{
 		Header: uint8(network.Error),
 		Data:   err,
 	}
-	// Send the message
-	if err := c.SendMessage(message); err != nil {
-		log.Error("Error sending message to client", err)
-	}
-
+	return c.SendMessage(&message)
 }
 
 func (c *Client) handleMessage(message network.Message) {
@@ -108,18 +105,49 @@ func (c *Client) handleMessage(message network.Message) {
 		// joining, and tell everyone in the lobby currently that someone new
 		// has joined
 		for _, client := range lobby.Clients {
-			client.SendMessage(joinedMsg)
+			client.SendMessage(&joinedMsg)
 			// Message to be sent to the client that joined to let them know
 			// what clients are connected
 			joinedMsg2 := network.Message{
 				Header: uint8(network.JoinedLobby),
 				Data:   fmt.Sprintf("%d,%s", client.Id, client.Name),
 			}
-			c.SendMessage(joinedMsg2)
+			c.SendMessage(&joinedMsg2)
 		}
 	case network.Progress:
 		// TODO
 	default:
 		c.SendError("Wtf man, not allowed")
+	}
+}
+
+func (c *Client) Disconnect() {
+
+	lobby := c.Lobby
+	c.Lobby = nil
+
+	if err := c.SendError("Disconnected from server"); err != nil {
+		log.Print("Could not tell the client they suck")
+	}
+
+	for i, client := range lobby.Clients {
+		// Check if the client being iterated over has the same address as c
+		if client == c {
+			// remove the client from the list
+			lobby.Clients[i] = lobby.Clients[len(lobby.Clients)-1]
+			lobby.Clients = lobby.Clients[:len(lobby.Clients)-1]
+			break
+		}
+	}
+
+	message := network.Message{
+		Header: uint8(network.LeftLobby),
+		Data:   string(c.Id),
+	}
+
+	// Doing double for loop because i am scared removing from list will mess
+	// with iteration
+	for _, client := range lobby.Clients {
+		client.SendMessage(&message)
 	}
 }
