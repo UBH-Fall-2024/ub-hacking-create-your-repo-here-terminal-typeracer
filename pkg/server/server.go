@@ -6,16 +6,14 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-
 const (
 	host = "0.0.0.0"
 	port = "24816"
 )
 
-func ServerAddress() string{
+func ServerAddress() string {
 	return net.JoinHostPort(host, port)
 }
-
 
 // Global server variable
 //
@@ -35,8 +33,8 @@ func NewServer(ln net.Listener) *Server {
 	s.ln = ln
 	s.totalClients = 0
 	s.totalLobbies = 0
-	s.Clients = make([]*Client, 8)
-	s.Lobbies = make([]*Lobby, 8)
+	s.Clients = make([]*Client, 0)
+	s.Lobbies = make([]*Lobby, 0)
 
 	server = s
 
@@ -69,7 +67,7 @@ func (s *Server) newClient(conn net.Conn) *Client {
 func (s *Server) NewLobby() *Lobby {
 	l := Lobby{
 		Id:       LobbyID(s.totalClients),
-		Clients:  make([]*Client, 8),
+		Clients:  make([]*Client, 0),
 		State:    WaitingForPlayers,
 		commands: make(chan func()),
 		finished: make(chan struct{}),
@@ -79,9 +77,12 @@ func (s *Server) NewLobby() *Lobby {
 	// Go through each command one by one and run it
 	//
 	// Commands are requests made by client
-	for command := range l.commands {
-		command()
-	}
+	go func() {
+		for command := range l.commands {
+			command()
+		}
+	}()
+
 	return &l
 }
 

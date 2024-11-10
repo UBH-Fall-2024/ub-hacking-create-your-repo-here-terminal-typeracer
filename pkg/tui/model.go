@@ -119,7 +119,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		log.Print(m.zone.Get(joinLobby))
 
 		if m.zone.Get(joinLobby).InBounds(msg) {
-			log.Print("HIIIIIIIIIIIIII guys")
 			cmds = append(cmds, func() tea.Msg {
 				m.SendMessage(&network.Message{
 					Header: uint8(network.JoinLobby),
@@ -155,7 +154,15 @@ func (m *Model) View() string {
 			m.height,
 			lipgloss.Center, // h align
 			lipgloss.Center, // v align
-			m.zone.Mark(joinLobby, m.style.buttonStyle.Render("Connect to lobby")),
+			m.style.connectingStyle.Render("Connecting..."),
+		)
+	case inLobby:
+		view = m.renderer.Place(
+			m.width,
+			m.height,
+			lipgloss.Center, // h align
+			lipgloss.Center, // v align
+			m.RenderClients(),
 		)
 	}
 

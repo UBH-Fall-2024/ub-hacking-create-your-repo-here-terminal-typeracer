@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"

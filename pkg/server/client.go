@@ -62,59 +62,67 @@ func (c *Client) SendError(err string) error {
 func (c *Client) handleMessage(message network.Message) {
 	req := network.Request(message.Header)
 
-	if c.Lobby == nil && req == network.Connect {
-		// Make the length of the request only 16 chars long (client names
-		// should not be over 16 chars)
-		clientName := message.Data
-		if len(clientName) >= 16 {
-			clientName = clientName[:16]
-		}
+	if c.Lobby == nil {
+		switch network.Request(message.Header) {
+		case network.Connect:
+			// Make the length of the request only 16 chars long (client names
+			// should not be over 16 chars)
+			clientName := message.Data
+			if len(clientName) >= 16 {
+				clientName = clientName[:16]
+			}
 
-		server.Clients = append(server.Clients, c)
-		return
-	}
-
-	// YOu need to be in a lobby
-	if c.Lobby != nil {
-		c.SendError("Why aren't you in a lobby wtf")
-		return
-	}
-	c.Lobby.commands <- func() {
-		switch req {
+			server.Clients = append(server.Clients, c)
+			return
 		case network.JoinLobby:
 			if c.Lobby != nil {
 				c.SendError("You're already in a lobby")
 				return
 			}
 
-			lobby := c.Lobby
+			lobby := server.FindOpenLobby()
+			c.Lobby = lobby
 
-			// Message to be sent to all clients already connected to the lobby
-			joinedMsg := network.Message{
-				Header: uint8(network.JoinedLobby),
-				Data:   fmt.Sprintf("%d,%s", c.Id, c.Name),
-			}
-			c.SendMessage(&network.Message{
-				Header: uint8(network.JoinedLobby),
-				Data:   "OK",
-			})
+			// Add this to the command queue for c.lobby
+			c.Lobby.commands <- func() {
+				// Message to be sent to all clients already connected to the lobby
+				joinedMsg := network.Message{
+					Header: uint8(network.JoinedLobby),
+					Data:   fmt.Sprintf("%d,%s", c.Id, c.Name),
+				}
 
-			// Let the client trying to join (c) know who is in the lobby they're
-			// joining, and tell everyone in the lobby currently that someone new
-			// has joined
-			for _, client := range lobby.Clients {
-				client.SendMessage(&joinedMsg)
-				// Message to be sent to the client that joined to let them know
-				// what clients are connected
+				// Send the connecting client an OK
 				c.SendMessage(&network.Message{
 					Header: uint8(network.JoinedLobby),
-					Data:   fmt.Sprintf("%d,%s", client.Id, client.Name),
+					Data:   "OK",
 				})
+
+				// Let the client trying to join (c) know who is in the lobby they're
+				// joining, and tell everyone in the lobby currently that someone new
+				// has joined
+				for _, client := range lobby.Clients {
+					client.SendMessage(&joinedMsg)
+					// Message to be sent to the client that joined to let them know
+					// what clients are connected
+					c.SendMessage(&network.Message{
+						Header: uint8(network.JoinedLobby),
+						Data:   fmt.Sprintf("%d,%s", client.Id, client.Name),
+					})
+				}
+
+				lobby.Clients = append(lobby.Clients, c)
+
+				if len(lobby.Clients) >= LOBBY_SIZE {
+					lobby.Start()
+				}
 			}
 
-			if len(lobby.Clients) >= LOBBY_SIZE {
-				lobby.Start()
-			}
+		}
+	}
+
+	// switch statement ain't needed here but idc anymore
+	c.Lobby.commands <- func() {
+		switch req {
 		case network.Progress:
 			c.Lobby.SendMessage(&network.Message{
 				Header: uint8(network.ProgUpdate),
@@ -137,36 +145,41 @@ func (c *Client) handleMessage(message network.Message) {
 }
 
 func (c *Client) Disconnect() {
+	if c.Lobby == nil {
+		return
+	}
 	lobby := c.Lobby
 	c.Lobby = nil
 
-	if err := c.SendError("Disconnected from server"); err != nil {
-		log.Print("Could not tell the client they suck")
-	}
-
-	// Remove c from the list, we want to make them not in there anymore
-	for i, client := range lobby.Clients {
-		// Check if the client being iterated over has the same address as c
-		if client == c {
-			// remove the client from the list
-			lobby.Clients[i] = lobby.Clients[len(lobby.Clients)-1]
-			lobby.Clients = lobby.Clients[:len(lobby.Clients)-1]
-			break
+	lobby.commands <- func() {
+		if err := c.SendError("Disconnected from server"); err != nil {
+			log.Print("Could not tell the client they suck")
 		}
-	}
 
-	if len(lobby.Clients) == 0 {
-		lobby.State = WaitingForPlayers
-	}
+		// Remove c from the list, we want to make them not in there anymore
+		for i, client := range lobby.Clients {
+			// Check if the client being iterated over has the same address as c
+			if client == c {
+				// remove the client from the list
+				lobby.Clients[i] = lobby.Clients[len(lobby.Clients)-1]
+				lobby.Clients = lobby.Clients[:len(lobby.Clients)-1]
+				break
+			}
+		}
 
-	message := network.Message{
-		Header: uint8(network.LeftLobby),
-		Data:   string(c.Id),
-	}
+		if len(lobby.Clients) == 0 {
+			lobby.State = WaitingForPlayers
+		}
 
-	// Doing double for loop because i am scared removing from list will mess
-	// with iteration
-	for _, client := range lobby.Clients {
-		client.SendMessage(&message)
+		message := network.Message{
+			Header: uint8(network.LeftLobby),
+			Data:   string(c.Id),
+		}
+
+		// Doing double for loop because i am scared removing from list will mess
+		// with iteration
+		for _, client := range lobby.Clients {
+			client.SendMessage(&message)
+		}
 	}
 }
