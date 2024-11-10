@@ -54,6 +54,11 @@ const (
 	//
 	// "<text>"
 	GameStart
+
+	// Leave me alone
+	//
+	// kill the client
+	LeaveMeAlone
 )
 
 type Message struct {

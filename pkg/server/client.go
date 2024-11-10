@@ -139,6 +139,10 @@ func (c *Client) handleMessage(message network.Message) {
 			if res == 100 {
 				c.Lobby.finished <- struct{}{}
 				for _, client := range c.Lobby.Clients {
+					client.SendMessage(&network.Message{
+						Header: uint8(network.LeaveMeAlone),
+						Data:   "",
+					})
 					client.Disconnect()
 					client.Conn.Close()
 				}

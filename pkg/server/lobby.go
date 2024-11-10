@@ -1,6 +1,10 @@
 package server
 
 import (
+	"encoding/json"
+	"io"
+	"math/rand/v2"
+	"os"
 	"time"
 
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
@@ -37,12 +41,32 @@ func (l *Lobby) SendMessage(message *network.Message) error {
 	return nil
 }
 
+func getTypingType() string {
+	jsonfile, err := os.Open("strings.json")
+	if err != nil {
+		return "I cannot json"
+	}
+	defer jsonfile.Close()
+
+	bytes, _ := io.ReadAll(jsonfile)
+
+	var result []string
+	json.Unmarshal([]byte(bytes), &result)
+	log.Print(&result)
+
+	return result[rand.IntN(len(result)-1)]
+
+}
+
 func (l *Lobby) Start() {
+
+	typer := getTypingType()
+
 	l.State = InGame
 
 	if err := l.SendMessage(&network.Message{
 		Header: uint8(network.GameStart),
-		Data:   "type this right now or else you will lose the entire game and i will cry and hate you forever because you suck at typing and you really need to do better and eat some chocolate chocolate chip ice cream cone tasty mm delicious",
+		Data:   typer,
 	}); err != nil {
 		log.Error("Could not start the server")
 	}

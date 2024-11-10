@@ -89,6 +89,9 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 					client.prog = &prog
 				}
 			}
+			return 0
+		case network.LeaveMeAlone:
+			return tea.Quit()
 		default:
 			panic("unexpected network.Event")
 		}
