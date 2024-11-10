@@ -55,15 +55,29 @@ func (s *Server) newClient(conn net.Conn) *Client {
 	return c
 }
 
+func (s *Server) NewLobby() *Lobby {
+	l := Lobby{
+		Id:       LobbyID(s.totalClients),
+		Clients:  make([]*Client, 8),
+		State:    WaitingForPlayers,
+		commands: make(chan func()),
+		finished: make(chan struct{}),
+	}
+
+	s.totalLobbies += 1
+	l.HandleMessages()
+	return &l
+}
+
 func (s *Server) FindOpenLobby() *Lobby {
 	for _, lobby := range s.Lobbies {
 		if lobby.State == WaitingForPlayers && len(lobby.Clients) < LOBBY_SIZE {
 			return lobby
 		}
 	}
-	// No lobbies found, so make a new lobby
 
-	lobby := new(Lobby)
+	// No lobbies found, so make a new lobby
+	lobby := s.NewLobby()
 	s.Lobbies = append(s.Lobbies, lobby)
 
 	return lobby

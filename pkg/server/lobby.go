@@ -1,14 +1,19 @@
 package server
 
-import "github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
+import (
+	"time"
+
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
+	"github.com/charmbracelet/log"
+)
 
 const LOBBY_SIZE = 4
 
 type LobbyState uint8
 
 const (
-	InGame LobbyState = iota
-	WaitingForPlayers
+	WaitingForPlayers LobbyState = iota
+	InGame
 )
 
 type LobbyID uint
@@ -18,7 +23,9 @@ type Lobby struct {
 	Id       LobbyID
 	Clients  []*Client
 	State    LobbyState
-	commands chan func(network.Message)
+	commands chan func()
+	// Channel to send to the progress ticker when the game is over
+	finished chan struct{}
 }
 
 func (l *Lobby) SendMessage(message *network.Message) error {
@@ -28,6 +35,24 @@ func (l *Lobby) SendMessage(message *network.Message) error {
 		}
 	}
 	return nil
+}
+
+func NewLobby() *Lobby {
+	l := new(Lobby)
+	l.commands = make(chan func())
+	l.State = WaitingForPlayers
+
+	l.HandleMessages()
+	return l
+}
+
+// Will handle each command sent to it one by one so no race
+// conditions!!!!!!!!!!!!!
+func (l *Lobby) HandleMessages() {
+	// Do this so we do each command individually so there's no race conditions
+	for command := range l.commands {
+		command()
+	}
 }
 
 func (l *Lobby) Start() {
@@ -45,10 +70,19 @@ func (l *Lobby) Start() {
 
 	ticker := time.NewTicker(1 * time.Second)
 
-	quit := make(chan struct {})
-
 	go func() {
-
-	}
+		for {
+			select {
+			case <-ticker.C:
+				l.SendMessage(&network.Message{
+					Header: uint8(network.ProgressPls),
+					Data:   "",
+				})
+			case <-l.finished:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 
 }
