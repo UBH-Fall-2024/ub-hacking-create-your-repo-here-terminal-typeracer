@@ -22,12 +22,15 @@ const (
 type Event uint8
 
 const (
+	// Used as a response to any clients who have been very naughty (Sending
+	// invalid requests or other undesirable behavior)
+	Error Event = iota
 	// Sent to all clients in a lobby when a new person joins the lobby, and
 	// also sent to the client that joined for every client already inside the
 	// lobby
 	//
 	// "<id>,<name>"
-	JoinedLobby = iota
+	JoinedLobby
 	//Sent by the server to ask clients to send their progress
 	//
 	// ""

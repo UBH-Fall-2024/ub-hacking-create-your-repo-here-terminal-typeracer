@@ -12,8 +12,8 @@ import (
 var server *Server
 
 type Server struct {
-	Lobbies      []Lobby
-	Clients      []Client
+	Lobbies      []*Lobby
+	Clients      []*Client
 	ln           net.Listener
 	totalLobbies uint
 	totalClients uint
@@ -24,8 +24,8 @@ func NewServer(ln net.Listener) *Server {
 	s.ln = ln
 	s.totalClients = 0
 	s.totalLobbies = 0
-	s.Clients = make([]Client, 8)
-	s.Lobbies = make([]Lobby, 8)
+	s.Clients = make([]*Client, 8)
+	s.Lobbies = make([]*Lobby, 8)
 
 	server = s
 
@@ -53,4 +53,13 @@ func (s *Server) newClient(conn net.Conn) *Client {
 
 	s.totalClients += 1
 	return c
+}
+
+func (s *Server) FindOpenLobby() *Lobby {
+	for _, lobby := range s.Lobbies {
+		if lobby.State == WaitingForPlayers && len(lobby.Clients) < LOBBY_SIZE {
+			return lobby
+		}
+	}
+	return nil
 }
