@@ -7,13 +7,8 @@ import (
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/server"
 )
 
-const (
-	host = "0.0.0.0"
-	port = "24816"
-)
-
 func main() {
-	ln, err := net.Listen("tcp", net.JoinHostPort(host, port))
+	ln, err := net.Listen("tcp", server.ServerAddress())
 	if err != nil {
 		log.Fatal(err)
 	}

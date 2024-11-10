@@ -6,6 +6,17 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+
+const (
+	host = "0.0.0.0"
+	port = "24816"
+)
+
+func ServerAddress() string{
+	return net.JoinHostPort(host, port)
+}
+
+
 // Global server variable
 //
 // Local to this package (server directory) only

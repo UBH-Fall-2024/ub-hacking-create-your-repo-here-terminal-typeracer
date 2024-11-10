@@ -66,10 +66,11 @@ func (c *Client) handleMessage(message network.Message) {
 		// Make the length of the request only 16 chars long (client names
 		// should not be over 16 chars)
 		clientName := message.Data
-		clientName = clientName[:16]
+		if len(clientName) >= 16 {
+			clientName = clientName[:16]
+		}
 
 		server.Clients = append(server.Clients, c)
-		log.Print("&**********************************G STUFF IS WORKING!!!!!!!!!!!!!!!!!!!!!")
 		return
 	}
 

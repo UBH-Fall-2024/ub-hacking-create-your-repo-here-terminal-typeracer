@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/network"
+	"github.com/Fejiberglibstein/terminal-typeracer/pkg/server"
 	"github.com/Fejiberglibstein/terminal-typeracer/pkg/tui"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
@@ -93,7 +94,8 @@ func bubbleteaMiddleware() wish.Middleware {
 			return nil
 		}
 
-		conn, err := net.Dial("tcp", net.JoinHostPort(host, port))
+		conn, err := net.Dial("tcp", server.ServerAddress())
+		log.Info("Connect ion is right here", conn)
 		if err != nil {
 			log.Print("Could not connect the poor soul :(")
 			return nil
