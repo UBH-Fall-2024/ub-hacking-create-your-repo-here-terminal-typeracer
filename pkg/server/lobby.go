@@ -37,17 +37,13 @@ func (l *Lobby) SendMessage(message *network.Message) error {
 	return nil
 }
 
-
 func (l *Lobby) Start() {
-
 	l.State = InGame
 
-	m := network.Message{
+	if err := l.SendMessage(&network.Message{
 		Header: uint8(network.GameStart),
 		Data:   "type this right now or else you will lose the entire game and i will cry and hate you forever because you suck at typing and you really need to do better and eat some chocolate chocolate chip ice cream cone tasty mm delicious",
-	}
-
-	if err := l.SendMessage(&m); err != nil {
+	}); err != nil {
 		log.Error("Could not start the server")
 	}
 

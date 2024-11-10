@@ -131,11 +131,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmds = append(cmds, func() tea.Msg { return 0 })
 			}
 
-			if msg.Type == tea.KeyRunes {
+			if msg.Type == tea.KeyRunes || msg.String() == " " {
 				if v.typoCharacters > 0 {
 					v.typoCharacters += 1
 				} else {
-					next := v.text[v.correctCharacters+1]
+					next := v.text[v.correctCharacters]
 					if string(next) == msg.String() {
 						v.correctCharacters += 1
 					} else {

@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"log"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -38,12 +37,12 @@ func (m *Model) RenderClients() string {
 }
 
 func renderCar(color string, prog int) string {
-	const length = 32
+	const length float64 = 32
 
-	f := prog / 100
+	f := float64(prog) / 100.0
 
-	start := strings.Repeat("▬", f*length)
-	end := strings.Repeat("▬", (1-f)*length)
+	start := strings.Repeat("▬", int(f*length))
+	end := strings.Repeat("▬", int((1-f)*length))
 
 	return lipgloss.NewStyle().Foreground(lipgloss.Color(color)).Render(start) + " 🚗 " + end
 }
@@ -60,12 +59,17 @@ func (m *Model) RenderTyper() string {
 		}
 
 		car := lipgloss.NewStyle().PaddingLeft(23).Render(renderCar(colors[i%len(colors)], *client.prog))
-		name := lipgloss.NewStyle().Width(22).PaddingRight(1).Render(client.getName())
+		name := lipgloss.NewStyle().Width(22).PaddingLeft(1).Render(client.getName())
 
 		s += car + name + "\n"
 	}
 
-	s += lipgloss.NewStyle().Width(70).Padding(4, 6, 0, 5).Render(m.renderText())
+	s += lipgloss.
+		NewStyle().
+		Width(70).
+		Padding(4, 6, 0, 5).
+		Foreground(lipgloss.NoColor{}).
+		Render(m.renderText())
 
 	return s
 
@@ -79,9 +83,9 @@ func (m *Model) renderText() string {
 	typo := v.text[v.correctCharacters : v.correctCharacters+v.typoCharacters]
 	end := v.text[v.correctCharacters+v.typoCharacters:]
 
-	s := start
-	s += lipgloss.NewStyle().Background(lipgloss.Color("9")).Render(typo)
-	s += lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render(end)
+	start = lipgloss.NewStyle().Foreground(lipgloss.Color("253")).Render(start)
+	typo = lipgloss.NewStyle().Background(lipgloss.Color("9")).Render(typo)
+	end = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render(end)
 
-	return s
+	return lipgloss.JoinHorizontal(lipgloss.Center, start, typo, end)
 }

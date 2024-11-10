@@ -169,6 +169,7 @@ func (c *Client) Disconnect() {
 
 		if len(lobby.Clients) == 0 {
 			lobby.State = WaitingForPlayers
+			lobby.finished <- struct{}{}
 		}
 
 		for _, client := range lobby.Clients {
