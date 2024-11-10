@@ -1,1 +1,12 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/_U2QbDVP)
+<div align="center">
+  <h1>Terminal Typeracer</h1>
+  <i> Typeracer in the terminal over ssh!</i>
+</div>
+Made in <24 hours for a hackathon.
+
+Try it out at
+
+```bash
+ssh terminal-typeracer.us -p 23234
+```
+
