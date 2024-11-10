@@ -48,7 +48,7 @@ func renderCar(color string, prog int) string {
 }
 
 func (m *Model) RenderTyper() string {
-	var s string
+	var cars []string
 	const WIDTH int = 81
 
 	for i, client := range m.clientsInLobby {
@@ -61,15 +61,17 @@ func (m *Model) RenderTyper() string {
 		car := lipgloss.NewStyle().PaddingLeft(23).Render(renderCar(colors[i%len(colors)], *client.prog))
 		name := lipgloss.NewStyle().Width(22).PaddingLeft(1).Render(client.getName())
 
-		s += car + name + "\n"
+		cars = append(cars, lipgloss.JoinHorizontal(lipgloss.Center, car, name))
 	}
 
-	s += lipgloss.
+	carGloss := lipgloss.JoinVertical(lipgloss.Center, cars...)
+
+	s := lipgloss.JoinVertical(lipgloss.Center, carGloss, lipgloss.
 		NewStyle().
 		Width(70).
 		Padding(4, 6, 0, 5).
-		Foreground(lipgloss.NoColor{}).
-		Render(m.renderText())
+		Render(m.renderText()),
+	)
 
 	return s
 
@@ -83,9 +85,20 @@ func (m *Model) renderText() string {
 	typo := v.text[v.correctCharacters : v.correctCharacters+v.typoCharacters]
 	end := v.text[v.correctCharacters+v.typoCharacters:]
 
-	start = lipgloss.NewStyle().Foreground(lipgloss.Color("253")).Render(start)
-	typo = lipgloss.NewStyle().Background(lipgloss.Color("9")).Render(typo)
-	end = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render(end)
+	start = lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color("253")).
+		Bold(true).
+		Render(start)
+	typo = lipgloss.
+		NewStyle().
+		Background(lipgloss.Color("9")).
+		Foreground(lipgloss.Color("253")).
+		Render(typo)
+	end = lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color("240")).
+		Render(end)
 
 	return lipgloss.JoinHorizontal(lipgloss.Center, start, typo, end)
 }

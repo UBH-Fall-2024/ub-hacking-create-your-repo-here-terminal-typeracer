@@ -63,7 +63,6 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 			return 0
 		case network.ProgUpdate:
 			res := strings.SplitN(msg.Data, ",", 2)
-			log.Print(res)
 
 			for _, client := range m.clientsInLobby {
 				if client.Id == res[0] {
@@ -79,7 +78,6 @@ func (m *Model) handleEvent(msg network.Message) tea.Cmd {
 			}
 		case network.ProgressPls:
 			prog := int((float64(m.typingInfo.correctCharacters) / float64(len(m.typingInfo.text))) * 100)
-			log.Print(m.typingInfo.correctCharacters, len(m.typingInfo.text))
 
 			m.SendMessage(&network.Message{
 				Header: uint8(network.Progress),

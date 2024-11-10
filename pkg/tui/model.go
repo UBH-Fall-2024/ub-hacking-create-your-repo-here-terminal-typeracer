@@ -135,6 +135,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if v.typoCharacters > 0 {
 					v.typoCharacters += 1
 				} else {
+					if v.correctCharacters > len(v.text) {
+						// We need to wait for the server to catch up with us
+						// :rolling_eyes:
+						return m, nil
+					}
 					next := v.text[v.correctCharacters]
 					if string(next) == msg.String() {
 						v.correctCharacters += 1
