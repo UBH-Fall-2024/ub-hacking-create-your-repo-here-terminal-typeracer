@@ -61,5 +61,10 @@ func (s *Server) FindOpenLobby() *Lobby {
 			return lobby
 		}
 	}
-	return nil
+	// No lobbies found, so make a new lobby
+
+	lobby := new(Lobby)
+	s.Lobbies = append(s.Lobbies, lobby)
+
+	return lobby
 }

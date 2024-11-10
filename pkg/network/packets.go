@@ -25,25 +25,35 @@ const (
 	// Used as a response to any clients who have been very naughty (Sending
 	// invalid requests or other undesirable behavior)
 	Error Event = iota
+
 	// Sent to all clients in a lobby when a new person joins the lobby, and
 	// also sent to the client that joined for every client already inside the
 	// lobby
 	//
 	// "<id>,<name>"
 	JoinedLobby
+
+	// Sent to all clients in a lobby when someone leaves the lobby
+	//
+	// "<id>"
+	LeftLobby
+
 	//Sent by the server to ask clients to send their progress
 	//
 	// ""
 	ProgressPls
+
 	// Sent to all clients when any client sends their progress. This will allow
 	// each client to update the ui to reflect who is winning
 	//
 	// "<id>,<prog>"
 	ProgUpdate
+
 	// Will tell clients its starting and give them all their text
 	//
 	// "<text>"
 	GameStart
+
 	// Countdown before game starts, probably 3 of these.
 	//
 	//	"<num>"
