@@ -2,7 +2,11 @@
   <h1>Terminal Typeracer</h1>
   <i> Typeracer in the terminal over ssh!</i>
 </div>
+
+---
+
 Made in <24 hours for a hackathon. I won the "Spirit of the Hackathon" award :tada:
+
 
 Try it out at
 ```bash
@@ -17,7 +21,7 @@ Use ctrl-c to quit
 ### Inspiration
 [typeracer](https://play.typeracer.com/) and [terminal.shop](https://www.terminal.shop/)
 
-## #What it does
+### What it does
 You can play typeracer in the terminal over ssh
 
 
