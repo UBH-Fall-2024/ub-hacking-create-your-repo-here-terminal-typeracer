@@ -10,9 +10,6 @@ Made in <24 hours for a hackathon. I won the "Spirit of the Hackathon" award :ta
 
 Try it out at
 ```bash
-ssh terminal-typeracer.us -p 23234
-
-# If the above doesn't work, try this
 ssh 45.55.159.44 -p 23234
 ```
 Use ctrl-c to quit
